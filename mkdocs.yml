@@ -1,0 +1,25 @@
+site_name: CCS Neural Engineering
+site_description: Scientific illustration and analysis package for neural engineering
+site_url: https://YOUR_GITHUB_USERNAME.github.io/CCS-neural-engineering
+repo_url: https://github.com/YOUR_GITHUB_USERNAME/CCS-neural-engineering
+repo_name: CCS-neural-engineering
+
+nav:
+  - Home: index.md
+  - Installation: installation.md
+  - API: api.md
+  - Tutorial: tutorials/polarity_tutorial.ipynb
+
+theme:
+  name: material
+
+plugins:
+  - search
+  - mkdocs-jupyter:
+      include_source: true
+      execute: false
+
+markdown_extensions:
+  - admonition
+  - toc:
+      permalink: true

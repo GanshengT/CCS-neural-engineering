@@ -9,7 +9,90 @@ import matplotlib.pyplot as plt
 
 COLOR_POSITIVE_RGB = "rgb(154,46,55)"
 COLOR_NEGATIVE_RGB = "rgb(50,107,156)"
-DEFAULT_PALETTE = {"Positive": COLOR_POSITIVE_RGB, "Negative": COLOR_NEGATIVE_RGB}
+DEFAULT_PALETTE = {"Positive": COLOR_POSITIVE_RGB, "Negative": COLOR_NEGATIVE_RGB, "combined": "lightgrey"}
+
+
+def plot_rayleigh_by_polarity(
+    res: pd.DataFrame,
+    value_col: str = "rayleigh_stat",
+    p_col: str = "rayleigh_p",
+    polarity_col: str = "polarity",
+    title: str = "Saccade-angle clustering by Polarity",
+) -> go.Figure:
+    """Replicate manuscript half-violin + jitter + median±SD style."""
+    x_map = {"Positive": 0, "Negative": 1, "combined": 2}
+    draw_order = ["Positive", "Negative", "combined"]
+
+    fig = go.Figure()
+    for pol in draw_order:
+        dfp = res[res[polarity_col] == pol]
+        if dfp.empty:
+            continue
+
+        color = DEFAULT_PALETTE[pol]
+        x0 = x_map[pol]
+
+        fig.add_trace(
+            go.Violin(
+                x=[x0] * len(dfp),
+                y=dfp[value_col],
+                legendgroup=pol,
+                scalegroup=pol,
+                name=f"{pol} violin",
+                side="negative",
+                width=0.6,
+                points=False,
+                line=dict(width=0),
+                fillcolor=color,
+                opacity=0.5,
+                spanmode="hard",
+                span=[0, 15],
+            )
+        )
+
+        xs = np.random.normal(loc=x0 + 0.1, scale=0.03, size=len(dfp))
+        marker_opacity = 0.02 if pol == "Positive" else 0.2
+        fig.add_trace(
+            go.Scatter(
+                x=xs,
+                y=dfp[value_col],
+                mode="markers",
+                marker=dict(color=color, size=6, opacity=marker_opacity),
+                name=f"{pol} points",
+                showlegend=False,
+            )
+        )
+
+        med = dfp[value_col].median()
+        sd = dfp[value_col].std(ddof=1)
+        fig.add_trace(
+            go.Scatter(
+                x=[x0 + 0.1],
+                y=[med],
+                error_y=dict(type="data", array=[sd], visible=True),
+                mode="markers",
+                marker=dict(color=color, size=14),
+                name=f"{pol} median±SD",
+                showlegend=False,
+            )
+        )
+
+    y_min = min(-1.0, float(res[value_col].min()) - 0.1)
+    y_max = max(10.0, float(res[value_col].max()) + 0.1)
+    fig.update_layout(
+        xaxis=dict(
+            tickmode="array",
+            tickvals=[0, 1, 2],
+            ticktext=["Positive", "Negative", "Combined"],
+            title="Polarity",
+        ),
+        yaxis=dict(title=value_col, range=(y_min, y_max)),
+        title=title,
+        width=700,
+        height=500,
+        template="simple_white",
+    )
+    return fig
 
 
 def plot_polarity_violin(
@@ -21,7 +104,7 @@ def plot_polarity_violin(
     palette: dict[str, str] | None = None,
 ) -> go.Figure:
     """Create split violin + mean/std overlays per condition and polarity."""
-    palette = palette or DEFAULT_PALETTE
+    palette = palette or {"Positive": COLOR_POSITIVE_RGB, "Negative": COLOR_NEGATIVE_RGB}
     if conditions is None:
         conditions = list(df[condition_col].dropna().unique())
 
