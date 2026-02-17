@@ -55,11 +55,81 @@ def plot_distribution_by_category(
     title: str | None = None,
     x_title: str | None = None,
     y_title: str | None = None,
+    x_range: tuple[float, float] | None = None,
+    y_range: tuple[float, float] | None = None,
+    font_size: int = 16,
+    tick_font_size: int = 13,
+    axis_line_width: float = 2.0,
+    tick_width: float = 2.0,
+    tick_len: float = 8.0,
     jitter: float = 0.03,
     point_opacity: float = 0.15,
     violin_opacity: float = 0.5,
 ) -> go.Figure:
-    """Generic half-violin distribution plot for arbitrary categories."""
+    """Plot category-wise distributions using half-violin, points, and summary markers.
+
+    Parameters:
+        df:
+            Long-format dataframe containing at least `value_col` and `category_col`.
+        value_col:
+            Numeric column to visualize on the y-axis.
+        category_col:
+            Column defining groups (binary or multi-category).
+        categories:
+            Optional explicit category order. If `None`, order follows dataframe appearance.
+        palette:
+            Optional explicit color mapping, e.g. `{"A": "#1f77b4", "B": "#ff7f0e"}`.
+        color_sequence:
+            Optional list of colors aligned with `categories`.
+        colormap:
+            Preset color map when `palette` and `color_sequence` are not provided.
+            Available: `ccs`, `plotly`, `viridis`, `plasma`.
+        summary:
+            Summary marker center. One of: `median`, `mean`.
+        show_points:
+            Whether to draw jittered raw points.
+        show_annotations:
+            Whether to add text annotation per category.
+        annotate_format:
+            Annotation template. Supports fields: `{n}`, `{summary}`, `{center}`, `{sd}`.
+        title:
+            Optional figure title override.
+        x_title:
+            Optional x-axis title override.
+        y_title:
+            Optional y-axis title override.
+        x_range:
+            Optional x-axis numeric range as `(min, max)`.
+        y_range:
+            Optional y-axis numeric range as `(min, max)`.
+        font_size:
+            Base font size for labels and title.
+        tick_font_size:
+            Tick label font size.
+        axis_line_width:
+            X/Y axis line width.
+        tick_width:
+            X/Y tick width.
+        tick_len:
+            X/Y tick length.
+        jitter:
+            Horizontal jitter scale for points.
+        point_opacity:
+            Opacity for point layer.
+        violin_opacity:
+            Opacity for violin layer.
+
+    Returns:
+        plotly.graph_objects.Figure:
+            Configured interactive Plotly figure.
+
+    Example:
+        >>> import pandas as pd
+        >>> from CCSNE.illustration import plot_distribution_by_category
+        >>> df = pd.DataFrame({"group": ["A", "A", "B", "B"], "value": [1.2, 1.5, 0.9, 1.0]})
+        >>> fig = plot_distribution_by_category(df, value_col="value", category_col="group", colormap="viridis")
+        >>> fig.show()
+    """
     if categories is None:
         categories = [str(c) for c in df[category_col].dropna().unique().tolist()]
     x_map = {cat: i for i, cat in enumerate(categories)}
@@ -137,13 +207,30 @@ def plot_distribution_by_category(
     y_min = float(y.min() - 0.1) if not y.empty else -1.0
     y_max = float(y.max() + 0.1) if not y.empty else 1.0
     fig.update_layout(
+        font=dict(size=font_size),
         xaxis=dict(
             tickmode="array",
             tickvals=list(x_map.values()),
             ticktext=[str(c) for c in categories],
             title=x_title or category_col,
+            range=x_range,
+            showline=True,
+            linewidth=axis_line_width,
+            ticks="outside",
+            tickwidth=tick_width,
+            ticklen=tick_len,
+            tickfont=dict(size=tick_font_size),
         ),
-        yaxis=dict(title=y_title or value_col, range=(y_min, y_max)),
+        yaxis=dict(
+            title=y_title or value_col,
+            range=y_range if y_range is not None else (y_min, y_max),
+            showline=True,
+            linewidth=axis_line_width,
+            ticks="outside",
+            tickwidth=tick_width,
+            ticklen=tick_len,
+            tickfont=dict(size=tick_font_size),
+        ),
         title=title or f"Distribution of {value_col} by {category_col}",
         width=760,
         height=520,
@@ -163,8 +250,64 @@ def plot_rayleigh_by_polarity(
     color_sequence: list[str] | None = None,
     colormap: str = "ccs",
     show_annotations: bool = True,
+    x_range: tuple[float, float] | None = None,
+    y_range: tuple[float, float] | None = None,
+    font_size: int = 16,
+    tick_font_size: int = 13,
+    axis_line_width: float = 2.0,
+    tick_width: float = 2.0,
+    tick_len: float = 8.0,
 ) -> go.Figure:
-    """Back-compatible wrapper specialized to Positive/Negative/combined polarity labels."""
+    """Wrapper for manuscript-style polarity distributions.
+
+    Parameters:
+        res:
+            Input dataframe with polarity labels and a Rayleigh-like statistic column.
+        value_col:
+            Numeric statistic column to display.
+        p_col:
+            Reserved for compatibility with previous code paths.
+        polarity_col:
+            Column containing labels such as `Positive`, `Negative`, `combined`.
+        title:
+            Plot title.
+        palette:
+            Optional explicit category-color mapping.
+        color_sequence:
+            Optional explicit ordered list of colors.
+        colormap:
+            Preset colormap name when explicit colors are not provided.
+        show_annotations:
+            Whether to annotate each category with summary text.
+        x_range:
+            Optional x-axis range override.
+        y_range:
+            Optional y-axis range override.
+        font_size:
+            Base font size for labels and title.
+        tick_font_size:
+            Tick label font size.
+        axis_line_width:
+            X/Y axis line width.
+        tick_width:
+            X/Y tick width.
+        tick_len:
+            X/Y tick length.
+
+    Returns:
+        plotly.graph_objects.Figure:
+            Interactive figure.
+
+    Example:
+        >>> import pandas as pd
+        >>> from CCSNE.illustration import plot_rayleigh_by_polarity
+        >>> res = pd.DataFrame({
+        ...     "polarity": ["Positive", "Negative", "combined"] * 3,
+        ...     "rayleigh_stat": [5.2, 3.7, 2.9, 4.8, 3.5, 2.7, 5.1, 3.8, 3.0],
+        ... })
+        >>> fig = plot_rayleigh_by_polarity(res)
+        >>> fig.show()
+    """
     categories = ["Positive", "Negative", "combined"]
     fig = plot_distribution_by_category(
         df=res,
@@ -180,6 +323,13 @@ def plot_rayleigh_by_polarity(
         title=title,
         x_title="Polarity",
         y_title=value_col,
+        x_range=x_range,
+        y_range=y_range,
+        font_size=font_size,
+        tick_font_size=tick_font_size,
+        axis_line_width=axis_line_width,
+        tick_width=tick_width,
+        tick_len=tick_len,
         point_opacity=0.12,
         violin_opacity=0.5,
     )
@@ -193,8 +343,59 @@ def plot_polarity_violin(
     polarity_col: str = "polarity",
     conditions: list[str] | None = None,
     palette: dict[str, str] | None = None,
+    x_range: tuple[float, float] | None = None,
+    y_range: tuple[float, float] | None = None,
+    font_size: int = 16,
+    tick_font_size: int = 13,
+    axis_line_width: float = 2.0,
+    tick_width: float = 2.0,
+    tick_len: float = 8.0,
 ) -> go.Figure:
-    """Create split violin + mean/std overlays per condition and polarity."""
+    """Plot condition-wise polarity violins with mean and SD overlays.
+
+    Parameters:
+        df:
+            Long-format dataframe containing condition, polarity, and value columns.
+        value_col:
+            Numeric value column.
+        condition_col:
+            Condition grouping column.
+        polarity_col:
+            Polarity grouping column.
+        conditions:
+            Optional explicit condition order.
+        palette:
+            Optional mapping from polarity labels to colors.
+        x_range:
+            Optional x-axis numeric range as `(min, max)`.
+        y_range:
+            Optional y-axis numeric range as `(min, max)`.
+        font_size:
+            Base font size for labels and title.
+        tick_font_size:
+            Tick label font size.
+        axis_line_width:
+            X/Y axis line width.
+        tick_width:
+            X/Y tick width.
+        tick_len:
+            X/Y tick length.
+
+    Returns:
+        plotly.graph_objects.Figure:
+            Interactive figure.
+
+    Example:
+        >>> import pandas as pd
+        >>> from CCSNE.illustration import plot_polarity_violin
+        >>> df = pd.DataFrame({
+        ...     "condition": ["pre", "pre", "post", "post"],
+        ...     "polarity": ["Positive", "Negative", "Positive", "Negative"],
+        ...     "PLV_norm": [0.2, 0.1, 0.3, 0.15],
+        ... })
+        >>> fig = plot_polarity_violin(df, value_col="PLV_norm")
+        >>> fig.show()
+    """
     palette = palette or {"Positive": COLOR_POSITIVE_RGB, "Negative": COLOR_NEGATIVE_RGB}
     if conditions is None:
         conditions = list(df[condition_col].dropna().unique())
@@ -261,8 +462,30 @@ def plot_polarity_violin(
         x_base += 1.5
 
     fig.update_layout(
-        xaxis=dict(tickmode="array", tickvals=list(range(len(conditions))), ticktext=conditions, title="Condition"),
-        yaxis=dict(title=value_col),
+        font=dict(size=font_size),
+        xaxis=dict(
+            tickmode="array",
+            tickvals=list(range(len(conditions))),
+            ticktext=conditions,
+            title="Condition",
+            range=x_range,
+            showline=True,
+            linewidth=axis_line_width,
+            ticks="outside",
+            tickwidth=tick_width,
+            ticklen=tick_len,
+            tickfont=dict(size=tick_font_size),
+        ),
+        yaxis=dict(
+            title=value_col,
+            range=y_range,
+            showline=True,
+            linewidth=axis_line_width,
+            ticks="outside",
+            tickwidth=tick_width,
+            ticklen=tick_len,
+            tickfont=dict(size=tick_font_size),
+        ),
         width=920,
         height=520,
         template="simple_white",

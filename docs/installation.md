@@ -32,3 +32,11 @@ pip install -e .[dev,docs]
 ```bash
 pip install "git+https://github.com/GanshengT/CCS-neural-engineering.git"
 ```
+
+## Optional export dependency
+
+For Plotly static export (`svg`, `pdf`, `eps`, `png`), install:
+
+```bash
+pip install kaleido
+```

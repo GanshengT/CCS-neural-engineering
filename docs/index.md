@@ -13,4 +13,4 @@
 - `CCSNE.illustration`
 - `CCSNE.analysis`
 
-See [Installation](installation.md), [API](api.md), and the [Tutorial](tutorials/polarity_tutorial.ipynb).
+See [Installation](installation.md), [API](api/index.md), and the [Tutorial](tutorials/polarity_tutorial.ipynb).

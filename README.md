@@ -43,6 +43,11 @@ fig = plot_distribution_by_category(
     category_col="group",
     colormap="viridis",
     show_annotations=True,
+    y_range=(0.5, 1.6),
+    font_size=18,
+    axis_line_width=2.5,
+    tick_width=2.5,
+    tick_len=10,
 )
 fig.show()
 ```
@@ -51,10 +56,20 @@ fig.show()
 
 `plot_rayleigh_by_polarity(...)` remains available and now uses the generic distribution engine underneath.
 
+Vector export helpers are also available:
+
+```python
+from CCSNE.illustration import save_plotly_figure
+save_plotly_figure(fig, "outputs/figure.svg")
+```
+
+No function auto-saves figures. Saving only happens when you explicitly call an export helper.
+
 ## Documentation
 
 - Project docs: see `docs/` locally
 - GitHub Pages deployment is configured via `.github/workflows/docs.yml`
+- API pages are generated from Python docstrings via `mkdocstrings`
 
 ## Dependency safety and compatibility
 

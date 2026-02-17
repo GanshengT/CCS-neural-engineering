@@ -7,7 +7,12 @@ repo_name: CCS-neural-engineering
 nav:
   - Home: index.md
   - Installation: installation.md
-  - API: api.md
+  - API:
+      - Overview: api/index.md
+      - Illustration:
+          - Distributions: api/illustration/distributions.md
+          - Circular: api/illustration/circular.md
+          - Export: api/illustration/export.md
   - Tutorial: tutorials/polarity_tutorial.ipynb
 
 theme:
@@ -15,6 +20,15 @@ theme:
 
 plugins:
   - search
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: [src]
+          options:
+            docstring_style: google
+            show_source: true
+            show_signature_annotations: true
+            separate_signature: true
   - mkdocs-jupyter:
       include_source: true
       execute: false
