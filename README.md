@@ -11,7 +11,7 @@ pip install ccs-neural-engineering
 For development (editable install):
 
 ```bash
-git clone <your-repo-url>
+git clone https://github.com/GanshengT/CCS-neural-engineering.git
 cd CCS-neural-engineering
 python -m venv .venv
 source .venv/bin/activate
@@ -63,3 +63,20 @@ fig.show()
 - Keep dependency ranges in `pyproject.toml` and avoid hard pins unless needed for reproducibility.
 
 This approach is safer than custom install-time checks and prevents breaking user installs.
+
+## Use It In Your Own Python Environment
+
+If you are actively developing this repo:
+
+```bash
+cd /path/to/CCS-neural-engineering
+python -m venv .venv
+source .venv/bin/activate
+pip install -e .
+```
+
+If you want to use it from GitHub without cloning:
+
+```bash
+pip install "git+https://github.com/GanshengT/CCS-neural-engineering.git"
+```
