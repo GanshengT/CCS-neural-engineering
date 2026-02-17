@@ -1,7 +1,12 @@
 import numpy as np
 import pandas as pd
 
-from CCSNE.illustration import plot_phase_rose, plot_polarity_violin, plot_rayleigh_by_polarity
+from CCSNE.illustration import (
+    plot_distribution_by_category,
+    plot_phase_rose,
+    plot_polarity_violin,
+    plot_rayleigh_by_polarity,
+)
 
 rng = np.random.default_rng(7)
 conditions = ["pre_pre_pre_pre", "pre_pre_pre", "pre_pre", "pre", "during", "post"]
@@ -29,3 +34,22 @@ rayleigh_df = pd.DataFrame({
 })
 rayleigh_df["rayleigh_p"] = np.exp(-rayleigh_df["rayleigh_stat"])
 plot_rayleigh_by_polarity(rayleigh_df).show()
+
+generic_df = pd.DataFrame(
+    {
+        "group": ["A"] * 60 + ["B"] * 60 + ["C"] * 60,
+        "value": np.concatenate(
+            [
+                rng.normal(1.3, 0.25, 60),
+                rng.normal(1.0, 0.20, 60),
+                rng.normal(0.8, 0.18, 60),
+            ]
+        ),
+    }
+)
+plot_distribution_by_category(
+    generic_df,
+    value_col="value",
+    category_col="group",
+    colormap="viridis",
+).show()

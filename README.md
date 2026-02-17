@@ -25,22 +25,31 @@ import CCSNE.illustration as ill
 import CCSNE.analysis as ana
 ```
 
-### Example: manuscript-style polarity plot
+### Example: generic category distribution plot
 
 ```python
 import pandas as pd
-from CCSNE.illustration import plot_rayleigh_by_polarity
+from CCSNE.illustration import plot_distribution_by_category
 
-res = pd.DataFrame(
+df = pd.DataFrame(
     {
-        "polarity": ["Positive", "Negative", "combined", "Positive", "Negative", "combined"],
-        "rayleigh_stat": [5.2, 3.8, 2.9, 6.1, 4.0, 3.1],
-        "rayleigh_p": [0.01, 0.03, 0.08, 0.007, 0.02, 0.07],
+        "group": ["A", "B", "C", "A", "B", "C", "A", "B", "C"],
+        "metric": [1.2, 0.9, 0.7, 1.4, 1.0, 0.8, 1.3, 1.1, 0.9],
     }
 )
-fig = plot_rayleigh_by_polarity(res)
+fig = plot_distribution_by_category(
+    df=df,
+    value_col="metric",
+    category_col="group",
+    colormap="viridis",
+    show_annotations=True,
+)
 fig.show()
 ```
+
+### For polarity/rayleigh style workflows
+
+`plot_rayleigh_by_polarity(...)` remains available and now uses the generic distribution engine underneath.
 
 ## Documentation
 
